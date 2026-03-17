@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#111111">
+<title>毎木調査</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  background: #1a1a1a;
+  color: #f0f0f0;
+  font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+#header {
+  position: sticky; top: 0; z-index: 20;
+  background: #111;
+  border-bottom: 2px solid #f5a623;
+  padding: 10px 14px 10px;
+}
+.header-top { display: flex; justify-content: space-between; align-items: center; }
+.header-subtitle { font-size: 10px; color: #f5a623; letter-spacing: 3px; }
+.header-title { font-size: 20px; font-weight: 900; letter-spacing: 1px; }
+.header-count-label { font-size: 10px; color: #888; text-align: right; }
+.header-count { font-size: 32px; font-weight: 900; color: #f5a623; line-height: 1; text-align: right; }
+.meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.meta-label { font-size: 10px; color: #888; letter-spacing: 1px; margin-bottom: 4px; font-weight: 700; }
+.meta-input {
+  width: 100%; padding: 8px 10px; font-size: 14px; border-radius: 10px;
+  background: #1e1e1e; border: 1.5px solid #3a3a3a;
+  color: #f0f0f0; font-family: inherit; outline: none;
+}
+.meta-input:focus { border-color: #f5a623; }
+.tabs { display: flex; gap: 8px; margin-top: 10px; }
+.tab {
+  flex: 1; padding: 10px 0; border-radius: 10px; border: 2px solid #333;
+  background: #222; color: #888; font-size: 15px; font-weight: 800;
+  cursor: pointer; font-family: inherit;
+}
+.tab.active { border-color: #f5a623; background: #f5a623; color: #111; }
+#input-view { padding: 12px 12px 0; }
+#list-view  { padding: 12px; }
+.lbl { font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 6px; font-weight: 700; }
+.section { margin-bottom: 14px; }
+.f-input {
+  width: 100%; background: #2a2a2a; border: 2px solid #3a3a3a;
+  border-radius: 12px; padding: 13px 14px;
+  color: #f0f0f0; font-size: 18px; outline: none; font-family: inherit;
+}
+.f-input:focus { border-color: #f5a623; }
+.f-input.center { text-align: center; font-size: 22px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.big-btn {
+  min-height: 68px; border-radius: 14px; border: 2px solid #333;
+  background: #1e1e1e; color: #555;
+  font-size: 18px; font-weight: 800; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; transition: all 0.1s;
+}
+.on-green  { border-color: #4caf50 !important; background: #1a3a1a !important; color: #4caf50 !important; }
+.on-orange { border-color: #f5a623 !important; background: #2a2200 !important; color: #f5a623 !important; }
+.on-red    { border-color: #e05555 !important; background: #2a1010 !important; color: #e05555 !important; }
+.species-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.species-btn {
+  min-height: 72px; border-radius: 14px; border: 2px solid #333;
+  background: #1e1e1e; color: #666;
+  font-size: 20px; font-weight: 900; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; transition: all 0.1s;
+}
+#register-btn {
+  width: 100%; min-height: 84px; border-radius: 16px; border: none;
+  background: linear-gradient(135deg, #e08a00, #f5a623);
+  color: #111; font-size: 24px; font-weight: 900;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 4px 24px #f5a62344; transition: all 0.15s; margin-top: 4px;
+}
+#register-btn.flash { background: #4caf50; box-shadow: 0 0 30px #4caf5088; color: #fff; }
+.hint { font-size: 11px; color: #555; text-align: center; margin-top: 8px; }
+.record-card {
+  background: #222; border-radius: 14px; padding: 14px;
+  margin-bottom: 10px; border: 1px solid #333;
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.record-top  { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+.badge       { font-size: 12px; border-radius: 6px; padding: 2px 8px; }
+.badge-color { background: #2a2200; color: #f5a623; border: 1px solid #f5a62344; }
+.badge-gps   { background: #001a2a; color: #4ab0f5; border: 1px solid #4ab0f544; }
+.record-no   { font-size: 11px; color: #555; }
+.record-num  { font-size: 13px; font-weight: 700; color: #bbb; }
+.record-sp   { font-size: 18px; font-weight: 900; color: #f0f0f0; }
+.record-vals { display: flex; gap: 12px; font-size: 14px; color: #aaa; flex-wrap: wrap; }
+.record-note { font-size: 12px; color: #666; margin-top: 4px; }
+.record-btns { display: flex; gap: 6px; margin-left: 8px; flex-shrink: 0; }
+.sm-btn { width: 48px; height: 48px; border-radius: 10px; font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; border: 1.5px solid; }
+.sm-edit { border-color: #f5a62355; background: #f5a62318; color: #f5a623; }
+.sm-del  { border-color: #e0555555; background: #e0555518; color: #e05555; }
+#edit-banner {
+  background: #332200; border: 1px solid #f5a623; border-radius: 10px;
+  padding: 8px 14px; margin-bottom: 12px; font-size: 13px; color: #f5a623;
+  display: none; justify-content: space-between; align-items: center;
+}
+#cancel-edit { background: none; border: none; color: #f5a623; font-size: 13px; cursor: pointer; font-family: inherit; }
+#csv-bar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  background: rgba(17,17,17,0.97);
+  border-top: 2px solid #f5a623;
+  padding: 12px 14px; display: none;
+}
+#csv-btn {
+  width: 100%; min-height: 62px; border-radius: 12px;
+  border: 2px solid #4caf50; background: #1a2a1a;
+  color: #4caf50; font-size: 17px; font-weight: 800;
+  cursor: pointer; font-family: inherit;
+}
+.empty-state { text-align: center; padding: 60px 20px; color: #444; }
+.empty-icon  { font-size: 48px; }
+.empty-text  { margin-top: 12px; font-size: 16px; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="header-top">
+    <div>
+      <div class="header-subtitle">FOREST SURVEY</div>
+      <div class="header-title">🌲 毎木調査</div>
+    </div>
+    <div>
+      <div class="header-count-label">登録数</div>
+      <div class="header-count" id="count-display">0</div>
+    </div>
+  </div>
+  <div class="meta-grid">
+    <div>
+      <div class="meta-label">現場名</div>
+      <input type="text" id="site-name" class="meta-input" placeholder="例: 青森北山林">
+    </div>
+    <div>
+      <div class="meta-label">事業名</div>
+      <input type="text" id="project-name" class="meta-input" placeholder="例: 令和6年度間伐">
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="tab-input" onclick="switchView('input')">✏️ 入力</button>
+    <button class="tab"        id="tab-list"  onclick="switchView('list')">📋 一覧</button>
+  </div>
+</div>
+
+<div id="input-view">
+  <div id="edit-banner">
+    <span id="edit-banner-text"></span>
+    <button id="cancel-edit" onclick="cancelEdit()">キャンセル</button>
+  </div>
+
+  <!-- 色・ナンバー・GPS -->
+  <div class="grid3">
+    <div>
+      <div class="lbl">色</div>
+      <input type="text" id="f-color" class="f-input" placeholder="赤">
+    </div>
+    <div>
+      <div class="lbl">ナンバー</div>
+      <input type="number" id="f-number" class="f-input center" inputmode="numeric" placeholder="1">
+    </div>
+    <div>
+      <div class="lbl">GPS No.</div>
+      <input type="number" id="f-gps" class="f-input center" inputmode="numeric" placeholder="1">
+    </div>
+  </div>
+
+  <!-- 樹種 -->
+  <div class="section">
+    <div class="lbl">樹種</div>
+    <div class="species-grid" id="species-grid"></div>
+  </div>
+
+  <!-- 胸高直径・樹高 -->
+  <div class="grid2">
+    <div>
+      <div class="lbl">胸高直径 (cm)</div>
+      <input type="number" id="f-dbh" class="f-input center" inputmode="decimal" step="0.1" placeholder="24.5">
+    </div>
+    <div>
+      <div class="lbl">樹高 (m)</div>
+      <input type="number" id="f-height" class="f-input center" inputmode="decimal" step="0.5" placeholder="18.0">
+    </div>
+  </div>
+
+  <!-- チルホール -->
+  <div class="section">
+    <div class="lbl">チルホール</div>
+    <div class="grid2">
+      <button class="big-btn" id="ch-on"  onclick="selectChiruhole('○')" style="font-size:28px">○</button>
+      <button class="big-btn" id="ch-off" onclick="selectChiruhole('なし')" style="font-size:16px">なし</button>
+    </div>
+  </div>
+
+  <!-- 斜面 -->
+  <div class="section">
+    <div class="lbl">斜面</div>
+    <div class="grid3">
+      <button class="big-btn" id="sl-s" onclick="selectSlope('小')" style="font-size:22px">小</button>
+      <button class="big-btn" id="sl-m" onclick="selectSlope('中')" style="font-size:22px">中</button>
+      <button class="big-btn" id="sl-l" onclick="selectSlope('大')" style="font-size:22px">大</button>
+    </div>
+  </div>
+
+  <!-- 備考 -->
+  <div class="section">
+    <div class="lbl">備考</div>
+    <input type="text" id="f-note" class="f-input" placeholder="メモ">
+  </div>
+
+  <button id="register-btn" onclick="handleRegister()">＋ 記録する</button>
+  <p class="hint">色は引き継ぎ　ナンバー・GPS No. は登録後に自動で +1</p>
+</div>
+
+<div id="list-view" style="display:none">
+  <div id="records-list"></div>
+</div>
+
+<div id="csv-bar">
+  <button id="csv-btn" onclick="exportCSV()">📥 CSVダウンロード</button>
+</div>
+
+<script>
+const TREE_SPECIES = ["アカマツ","ナラ","サクラ","広葉樹"];
+let records = [];
+let selectedSpecies   = "";
+let selectedChiruhole = "なし";
+let selectedSlope     = "";
+let editIdx = null;
+
+// 樹種ボタン生成
+const sgrid = document.getElementById("species-grid");
+TREE_SPECIES.forEach(s => {
+  const b = document.createElement("button");
+  b.className = "species-btn";
+  b.id = "sp-" + s;
+  b.textContent = s;
+  b.onclick = () => selectSpecies(s);
+  sgrid.appendChild(b);
+});
+
+function selectSpecies(s) {
+  selectedSpecies = s;
+  TREE_SPECIES.forEach(t => {
+    const el = document.getElementById("sp-" + t);
+    if (t === s) { el.classList.add("on-orange"); }
+    else         { el.classList.remove("on-orange"); }
+  });
+}
+
+function selectChiruhole(val) {
+  selectedChiruhole = val;
+  const on  = document.getElementById("ch-on");
+  const off = document.getElementById("ch-off");
+  on.classList.remove("on-green");
+  off.classList.remove("on-red");
+  if (val === "○")   on.classList.add("on-green");
+  else              off.classList.add("on-red");
+}
+
+function selectSlope(val) {
+  selectedSlope = val;
+  const map = {"小":["sl-s","on-green"],"中":["sl-m","on-orange"],"大":["sl-l","on-red"]};
+  Object.values(map).forEach(([id, cls]) => document.getElementById(id).classList.remove(cls));
+  const [id, cls] = map[val];
+  document.getElementById(id).classList.add(cls);
+}
+
+function switchView(v) {
+  document.getElementById("input-view").style.display = v === "input" ? "block" : "none";
+  document.getElementById("list-view").style.display  = v === "list"  ? "block" : "none";
+  document.getElementById("tab-input").classList.toggle("active", v === "input");
+  document.getElementById("tab-list").classList.toggle("active",  v === "list");
+  document.getElementById("tab-list").textContent = "📋 一覧(" + records.length + ")";
+  if (v === "list") renderList();
+}
+
+function handleRegister() {
+  if (!selectedSpecies) { alert("樹種を選んでください"); return; }
+  const dbh = document.getElementById("f-dbh").value;
+  if (!dbh) { alert("胸高直径を入力してください"); return; }
+
+  const color  = document.getElementById("f-color").value;
+  const number = document.getElementById("f-number").value;
+  const gps    = document.getElementById("f-gps").value;
+  const height = document.getElementById("f-height").value;
+  const note   = document.getElementById("f-note").value;
+
+  const rec = {
+    color, number, gps, species: selectedSpecies,
+    dbh, height, chiruhole: selectedChiruhole,
+    slope: selectedSlope, note, id: Date.now()
+  };
+
+  if (editIdx !== null) {
+    records[editIdx] = rec;
+    editIdx = null;
+    hideBanner();
+  } else {
+    records.push(rec);
+  }
+
+  // 色引き継ぎ、ナンバー・GPS+1
+  const nextNum = number !== "" ? String(parseInt(number||"0") + 1) : "";
+  const nextGps = gps    !== "" ? String(parseInt(gps   ||"0") + 1) : "";
+  document.getElementById("f-number").value = nextNum;
+  document.getElementById("f-gps").value    = nextGps;
+
+  // リセット
+  selectedSpecies = "";
+  TREE_SPECIES.forEach(t => document.getElementById("sp-"+t).classList.remove("on-orange"));
+  document.getElementById("f-dbh").value    = "";
+  document.getElementById("f-height").value = "";
+  selectChiruhole("なし");
+  selectedSlope = "";
+  [["sl-s","on-green"],["sl-m","on-orange"],["sl-l","on-red"]].forEach(([id,cls]) =>
+    document.getElementById(id).classList.remove(cls));
+  document.getElementById("f-note").value = "";
+
+  updateCount();
+  flashBtn();
+}
+
+function flashBtn() {
+  const btn = document.getElementById("register-btn");
+  btn.textContent = "✓ 記録しました！";
+  btn.classList.add("flash");
+  setTimeout(() => { btn.textContent = "＋ 記録する"; btn.classList.remove("flash"); }, 900);
+}
+
+function updateCount() {
+  document.getElementById("count-display").textContent = records.length;
+  document.getElementById("tab-list").textContent = "📋 一覧(" + records.length + ")";
+  document.getElementById("csv-bar").style.display = records.length > 0 ? "block" : "none";
+  document.getElementById("csv-btn").textContent = "📥 CSVダウンロード (" + records.length + "件)";
+}
+
+function renderList() {
+  const el = document.getElementById("records-list");
+  if (records.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🌲</div><div class="empty-text">まだ記録がありません</div></div>';
+    return;
+  }
+  el.innerHTML = records.map((r, i) => {
+    const slopeColor = r.slope === "大" ? "#e05555" : r.slope === "中" ? "#f5a623" : "#7acc50";
+    return '<div class="record-card">' +
+      '<div style="flex:1">' +
+        '<div class="record-top">' +
+          '<span class="record-no">No.' + (i+1) + '</span>' +
+          (r.color  ? '<span class="badge badge-color">' + r.color  + '</span>' : '') +
+          (r.number ? '<span class="record-num">#' + r.number + '</span>' : '') +
+          (r.gps    ? '<span class="badge badge-gps">GPS ' + r.gps + '</span>' : '') +
+          '<span class="record-sp">' + r.species + '</span>' +
+        '</div>' +
+        '<div class="record-vals">' +
+          '<span>Φ <b style="color:#f5a623">' + r.dbh + '</b> cm</span>' +
+          (r.height ? '<span>H <b>' + r.height + '</b> m</span>' : '') +
+          (r.chiruhole === "○" ? '<span style="color:#4caf50">チルホール ○</span>' : '') +
+          (r.slope ? '<span style="color:' + slopeColor + '">斜面 ' + r.slope + '</span>' : '') +
+        '</div>' +
+        (r.note ? '<div class="record-note">📝 ' + r.note + '</div>' : '') +
+      '</div>' +
+      '<div class="record-btns">' +
+        '<button class="sm-btn sm-edit" onclick="startEdit(' + i + ')">✏️</button>' +
+        '<button class="sm-btn sm-del"  onclick="deleteRecord(' + i + ')">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+}
+
+function startEdit(idx) {
+  const r = records[idx];
+  editIdx = idx;
+  switchView("input");
+  document.getElementById("f-color").value  = r.color;
+  document.getElementById("f-number").value = r.number;
+  document.getElementById("f-gps").value    = r.gps;
+  document.getElementById("f-dbh").value    = r.dbh;
+  document.getElementById("f-height").value = r.height;
+  document.getElementById("f-note").value   = r.note;
+  selectSpecies(r.species);
+  selectChiruhole(r.chiruhole);
+  if (r.slope) selectSlope(r.slope);
+  document.getElementById("edit-banner").style.display = "flex";
+  document.getElementById("edit-banner-text").textContent = "✏️ No." + (idx+1) + " 編集中";
+  document.getElementById("register-btn").textContent = "✏️ 更新する";
+}
+
+function cancelEdit() { editIdx = null; hideBanner(); resetForm(); }
+
+function hideBanner() {
+  document.getElementById("edit-banner").style.display = "none";
+  document.getElementById("register-btn").textContent = "＋ 記録する";
+}
+
+function resetForm() {
+  selectedSpecies = "";
+  TREE_SPECIES.forEach(t => document.getElementById("sp-"+t).classList.remove("on-orange"));
+  document.getElementById("f-dbh").value    = "";
+  document.getElementById("f-height").value = "";
+  selectChiruhole("なし");
+  selectedSlope = "";
+  [["sl-s","on-green"],["sl-m","on-orange"],["sl-l","on-red"]].forEach(([id,cls]) =>
+    document.getElementById(id).classList.remove(cls));
+  document.getElementById("f-note").value = "";
+}
+
+function deleteRecord(idx) {
+  if (!confirm("この記録を削除しますか？")) return;
+  records.splice(idx, 1);
+  if (editIdx === idx) { editIdx = null; hideBanner(); }
+  updateCount();
+  renderList();
+}
+
+function exportCSV() {
+  const headers = ["色","ナンバー","GPS No.","樹種","胸高直径(cm)","樹高(m)","チルホール","斜面","備考"];
+  const rows = records.map(r => [r.color, r.number, r.gps, r.species, r.dbh, r.height, r.chiruhole, r.slope, r.note]);
+  const bom = "\uFEFF";
+  const csv = bom + [headers, ...rows]
+    .map(row => row.map(v => '"' + String(v??'').replace(/"/g,'""') + '"').join(","))
+    .join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  const d    = new Date();
+  const date = d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+  const site    = document.getElementById("site-name").value.trim();
+  const project = document.getElementById("project-name").value.trim();
+  const parts   = ["毎木調査", site, project, date].filter(p => p !== "");
+  a.href     = url;
+  a.download = parts.join("_") + ".csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// 初期化
+selectChiruhole("なし");
+</script>
+</body>
+</html>
